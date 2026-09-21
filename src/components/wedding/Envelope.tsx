@@ -10,13 +10,16 @@ const LETTER = 1150;
 const BEAT = 420;
 
 /**
- * Scene 1 — a plain field of light blue, and the couple's name arriving a
- * letter at a time.
+ * Scene 1 — a painted sky, and the couple's name written into it in white.
  *
- * Nothing else is on this screen on purpose. It replaced a photograph behind
- * frosted glass, which asked a guest to look at something before they had been
- * told whose wedding it was; a name that writes itself says that first, and
- * says it more quietly.
+ * The sky is a four-second loop: clouds drifting, a flock crossing, pampas
+ * grass swaying in at the edges. It carries the screen on its own, so nothing
+ * else is on it but the name.
+ *
+ * Muted and playsinline are not decoration. Mobile browsers refuse to autoplay
+ * anything else, and a video that will not start would leave this screen black
+ * — hence the poster too, which is the film's own first frame and holds the
+ * screen while the file loads, or instead of it if playback never begins.
  *
  * Tapping hands over to the hero, and the overlay in index.tsx cross-fades the
  * two. The tap matters beyond the animation: browsers will not start audio
@@ -35,7 +38,7 @@ export function Envelope({ onOpened }: { onOpened: () => void }) {
     if (opening) return;
     setOpening(true);
     startMusic();
-    // Long enough for the field to lift before the hero takes over.
+    // Long enough for the sky to lift before the hero takes over.
     timer.current = window.setTimeout(onOpened, 480);
   };
 
@@ -57,10 +60,9 @@ export function Envelope({ onOpened }: { onOpened: () => void }) {
       }}
       className="relative h-full w-full overflow-hidden outline-none"
       style={{
-        // A sky rather than a flat swatch: one blue at three strengths, so the
-        // field has somewhere to be light and somewhere to rest.
-        background:
-          "linear-gradient(175deg, oklch(0.96 0.019 232) 0%, oklch(0.925 0.032 235) 58%, oklch(0.895 0.04 238) 100%)",
+        // The sky's own blue, so any letterboxing or slow first paint is the
+        // same colour as the film rather than a black band.
+        background: "oklch(0.86 0.045 235)",
         cursor: opening ? "default" : "pointer",
         touchAction: "manipulation",
         WebkitTapHighlightColor: "transparent",
@@ -68,6 +70,31 @@ export function Envelope({ onOpened }: { onOpened: () => void }) {
         transition: "opacity 460ms ease",
       }}
     >
+      <video
+        src="/opening.mp4"
+        poster="/opening-poster.jpg"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+        aria-hidden="true"
+        className="absolute inset-0 h-full w-full object-cover object-center"
+      />
+
+      {/* White on a painted sky is white on white wherever a cloud is. This is
+          just enough shade behind the name to keep it legible, weighted to the
+          middle band where the type sits and fading out before it darkens the
+          clouds the film is there to show. */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(74% 26% at 50% 47%, oklch(0.42 0.05 248 / 0.2), transparent 76%)",
+        }}
+      />
+
       <div className="absolute inset-0 flex flex-col items-center justify-center px-7 text-center">
         <h1
           // The whole name is the accessible name; the spans below are scenery,
@@ -79,7 +106,12 @@ export function Envelope({ onOpened }: { onOpened: () => void }) {
             fontSize: "clamp(2.3rem, 12.5vw, 3.6rem)",
             fontWeight: 400,
             letterSpacing: "-0.012em",
-            color: "oklch(0.32 0.045 250)",
+            color: "oklch(1 0 0)",
+            // A shadow rather than a heavier scrim: it travels with the
+            // letters, so a bright cloud drifting behind one of them cannot
+            // swallow it.
+            textShadow:
+              "0 2px 22px oklch(0.32 0.05 248 / 0.55), 0 1px 4px oklch(0.32 0.05 248 / 0.45)",
           }}
         >
           {letters.map((ch, i) => (
@@ -103,8 +135,7 @@ export function Envelope({ onOpened }: { onOpened: () => void }) {
           aria-hidden="true"
           className="animate-settle mt-8 h-px w-16"
           style={{
-            background:
-              "linear-gradient(90deg, transparent, oklch(0.55 0.06 250 / 0.55), transparent)",
+            background: "linear-gradient(90deg, transparent, oklch(1 0 0 / 0.75), transparent)",
             animationDelay: `${written}ms`,
           }}
         />
@@ -121,15 +152,15 @@ export function Envelope({ onOpened }: { onOpened: () => void }) {
         <span
           className="rounded-full px-9 py-4"
           style={{
-            background: "oklch(1 0 0 / 0.5)",
-            border: "1px solid oklch(1 0 0 / 0.7)",
-            backdropFilter: "blur(6px)",
-            WebkitBackdropFilter: "blur(6px)",
+            background: "oklch(1 0 0 / 0.16)",
+            border: "1px solid oklch(1 0 0 / 0.55)",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
           }}
         >
           <span
             className="font-body text-[0.66rem] font-medium tracking-[0.3em] uppercase"
-            style={{ color: "oklch(0.38 0.05 250)" }}
+            style={{ color: "oklch(1 0 0)", textShadow: "0 1px 6px oklch(0.35 0.05 248 / 0.4)" }}
           >
             Open Invitation
           </span>
