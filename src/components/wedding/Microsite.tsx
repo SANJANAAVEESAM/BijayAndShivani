@@ -16,6 +16,7 @@ import {
   bookByLabel,
   HOTELS,
   hotelHref,
+  shortDate,
   WEDDING_DATE_RANGE,
   WEDDING_YEAR,
   WHATSAPP_NUMBER,
@@ -199,7 +200,9 @@ function EventsSection() {
         </h2>
         <Ornament className="mt-4 mb-8" />
 
-        <div className="flex justify-center gap-2">
+        {/* Wraps by design. Four fit a phone at this size; a fifth day would
+            wrap onto a second row rather than widen the page. */}
+        <div className="flex flex-wrap justify-center gap-1.5">
           {EVENT_DAYS.map((d, i) => {
             const on = i === dayIdx;
             return (
@@ -208,7 +211,7 @@ function EventsSection() {
                 type="button"
                 onClick={() => setDayIdx(i)}
                 aria-pressed={on}
-                className="rounded-full px-5 py-3 font-body text-[0.82rem] font-semibold tracking-[0.08em] uppercase transition-colors"
+                className="rounded-full px-3.5 py-2.5 font-body text-[0.72rem] font-semibold tracking-[0.06em] uppercase transition-colors"
                 style={{
                   background: on ? "var(--bronze)" : "color-mix(in oklab, var(--ivory) 62%, transparent)",
                   color: on ? "var(--primary-foreground)" : "var(--muted-foreground)",
@@ -216,7 +219,7 @@ function EventsSection() {
                   border: `1px solid ${on ? "transparent" : "color-mix(in oklab, var(--gold) 38%, transparent)"}`,
                 }}
               >
-                {d.date.replace(" October", " Oct")}
+                {shortDate(d.date)}
               </button>
             );
           })}
@@ -614,7 +617,7 @@ function VenueList() {
               {/* The date stays quiet so the bold event name reads as the label
                   for the venue below, rather than the two competing. */}
               <p className="font-body text-[0.58rem] tracking-[0.18em] uppercase text-muted-foreground">
-                {dates.map((d) => d.replace(" October", " Oct")).join(" & ")}
+                {dates.map(shortDate).join(" & ")}
                 <span aria-hidden="true"> · </span>
                 <span className="font-bold text-foreground/75">{label}</span>
               </p>

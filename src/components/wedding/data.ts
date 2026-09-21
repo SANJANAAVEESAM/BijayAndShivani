@@ -358,6 +358,17 @@ export function venueMapsHref(venue: Venue): string | null {
   return null;
 }
 
+/**
+ * "14 November" as "14 Nov", for the places a full month name will not fit.
+ *
+ * Abbreviates whichever month it is given rather than one named month. This
+ * was written as a replace of the literal "October", and when the dates moved
+ * to November it silently stopped shortening anything — four full-length day
+ * tabs then ran off the side of a phone and took the whole page with them.
+ */
+export const shortDate = (date: string): string =>
+  date.replace(/\s([A-Z][a-z]{2})[a-z]+$/, " $1");
+
 export const EVENTS: WeddingEvent[] = EVENT_DAYS.flatMap((day) => day.events);
 
 
