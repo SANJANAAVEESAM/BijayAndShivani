@@ -56,7 +56,7 @@ export function FloatingNav({ visible }: { visible: boolean }) {
           aria-label="Back to top"
           className="font-display text-xl leading-none text-foreground"
         >
-          {COUPLE.bride[0]}&amp;{COUPLE.groom[0]}
+          {COUPLE.groom[0]}&amp;{COUPLE.bride[0]}
         </button>
 
         <div className="flex items-center gap-1.5">

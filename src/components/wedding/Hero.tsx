@@ -1,5 +1,5 @@
 import couplePhoto from "@/assets/couple.jpg";
-import { COUPLE } from "./data";
+import { COUPLE_AND } from "./data";
 import { useScrollProgress } from "@/hooks/use-scroll-progress";
 
 /** How much of its height the card gives up across the scroll, in percent. */
@@ -30,10 +30,13 @@ export function Hero({ live }: { live: boolean }) {
         >
           <img
             src={couplePhoto}
-            alt={`${COUPLE.bride} and ${COUPLE.groom} walking on a beach at golden hour`}
-            width={798}
-            height={1200}
-            className="animate-hero-zoom absolute inset-0 h-full w-full object-cover object-center"
+            alt={`${COUPLE_AND} on the beach`}
+            width={1000}
+            height={1500}
+            // They stand left of middle in the original, so a symmetric crop
+            // leaves the pair off-centre in a tall card.
+            className="animate-hero-zoom absolute inset-0 h-full w-full object-cover"
+            style={{ objectPosition: "34% center" }}
           />
 
           {/* Just enough shading under the type to keep white legible on sand */}
@@ -63,7 +66,7 @@ export function Hero({ live }: { live: boolean }) {
                 textShadow: "0 2px 18px oklch(0.24 0.03 60 / 0.4)",
               }}
             >
-              {COUPLE.bride} &amp; {COUPLE.groom}
+              {COUPLE_AND}
             </h1>
 
             <div className="mt-7 h-px w-full bg-white/45" />
