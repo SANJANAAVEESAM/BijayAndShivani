@@ -1,26 +1,33 @@
 import { useEffect, useRef, useState } from "react";
 import { COUPLE_AND } from "./data";
 import { startMusic } from "@/lib/music";
+import backdrop from "@/assets/backdrop.jpg";
 
 /** How long the stroke takes to cross the name, in ms — in step with styles.css. */
 const WRITE = 2400;
 /** A beat after the name lands before the cue appears, in ms. */
 const BEAT = 420;
 
-/** The ground, and the type that sits on it. */
-const TEAL = "oklch(0.43 0.062 195)";
-const INK = "oklch(0.985 0.004 190)";
+/** The wash, and the type that sits on it. */
+const TEAL = "oklch(0.56 0.07 193)";
+const INK = "oklch(0.99 0.004 190)";
+/** How much of the wash, and so how little of the photograph. */
+const WASH = 0.8;
 
 /**
- * Scene 1 — a plain field of teal, and the couple's name written across it.
+ * Scene 1 — the couple's photograph under a teal wash, their name written
+ * across it.
  *
- * Nothing else is on this screen. A flat ground needs no scrim and no shadow
- * to hold white type, so the name can be exactly as clean as it is — which is
- * the whole point of choosing a colour over a picture.
+ * The wash does two jobs at once. It carries the colour, and it flattens the
+ * photograph far enough that white type holds everywhere without a scrim or a
+ * shadow — the picture reads as a texture under the colour rather than as a
+ * photograph competing with the name. Enough of them shows through to know
+ * who this is; not so much that the name has to fight for the screen.
  *
- * Tapping hands over to the hero, and the overlay in index.tsx cross-fades the
- * two. The tap matters beyond the animation: browsers will not start audio
- * without a user gesture, and this is the first one on offer.
+ * Tapping hands over to the hero, where the same photograph is finally seen
+ * whole and unwashed. The overlay in index.tsx cross-fades the two, and the
+ * tap matters beyond the animation: browsers will not start audio without a
+ * user gesture, and this is the first one on offer.
  */
 export function Envelope({ onOpened }: { onOpened: () => void }) {
   const [opening, setOpening] = useState(false);
@@ -55,6 +62,8 @@ export function Envelope({ onOpened }: { onOpened: () => void }) {
       }}
       className="relative h-full w-full overflow-hidden outline-none"
       style={{
+        // Under the photograph as well as behind it, so a slow decode shows
+        // the colour rather than a white flash.
         background: TEAL,
         cursor: opening ? "default" : "pointer",
         touchAction: "manipulation",
@@ -63,6 +72,31 @@ export function Envelope({ onOpened }: { onOpened: () => void }) {
         transition: "opacity 460ms ease",
       }}
     >
+      <img
+        src={backdrop}
+        alt=""
+        aria-hidden="true"
+        width={1000}
+        height={1500}
+        // They stand left of middle in the original, so a symmetric crop would
+        // leave the pair off-centre on a tall phone.
+        className="absolute inset-0 h-full w-full object-cover"
+        style={{ objectPosition: "34% center" }}
+      />
+
+      {/* One even sheet of colour, and deliberately not a multiply blend.
+          Multiplying keeps the photograph's own light and shade, which sounds
+          better than it looks here: it drove the dark sky at the top and the
+          wet sand at the bottom down into heavy bands while the middle stayed
+          pale, so the screen read as three stripes rather than one colour.
+          Flat opacity gives the same teal everywhere and lets the couple show
+          through it evenly. */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0"
+        style={{ background: TEAL, opacity: WASH }}
+      />
+
       <div className="absolute inset-0 flex flex-col items-center justify-center px-7 text-center">
         <h1
           className="animate-write font-display leading-[1.08]"
