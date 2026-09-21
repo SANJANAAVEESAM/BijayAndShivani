@@ -154,6 +154,9 @@ function JoinUs() {
   return (
     <section
       ref={ref}
+      // Named so the scroll thread knows where its journey ends: the line runs
+      // from the opening to here and no further.
+      id="join"
       className="relative w-full overflow-hidden px-6 py-20 text-center"
     >
       {celebrate && <Confetti />}

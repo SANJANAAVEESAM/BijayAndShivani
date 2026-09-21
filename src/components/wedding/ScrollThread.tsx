@@ -1,24 +1,23 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
- * A curved hairline that winds down the page, with an arrow travelling its head.
+ * A single curved line that draws itself down the page, and stops.
  *
- * Three things here are deliberate, and each replaces something that did not
- * work.
+ * Only the line. An arrow rode its head and a faint route ran the whole height
+ * behind it; both are gone. The route gave the ending away, and the arrow put
+ * a marker on a page that has no need of one — the line's own head is already
+ * the place it has reached.
  *
- * The path curves. A straight line down the middle is a rule, not a thread —
- * it reads as a divider between two columns rather than as a route through
- * the invitation.
+ * It runs from the opening to the moment the invitation turns colour, and no
+ * further. That is the whole of the journey it exists to draw; carried on down
+ * the venues and the RSVP it would just be a line on a page.
  *
  * It runs on a standing animation frame loop rather than on the scroll event.
  * Scroll is not a smooth signal: iOS coarsens it during momentum scrolling and
- * stops sending it altogether at the ends, so anything positioned directly
- * from it arrives in steps however carefully it is written. The loop reads the
- * scroll every frame whether or not an event fired.
- *
- * And it eases towards its target instead of snapping to it. Each frame closes
- * part of the gap, which turns even coarse scroll data into continuous motion
- * and gives the arrow a little weight as it settles.
+ * stops sending it altogether at the ends, so anything driven straight from it
+ * arrives in steps however carefully it is written. The loop reads the scroll
+ * every frame whether or not an event fired, and eases towards it rather than
+ * snapping, which turns even coarse data into continuous motion.
  *
  * It sits behind the page. Drawn over the top, the line crossed the nav and
  * the couple's names — a stripe over an invitation rather than a thread
@@ -29,28 +28,63 @@ import { useEffect, useRef } from "react";
 const PATH = "M 50 0 C 50 10, 20 17, 20 30 C 20 45, 80 48, 80 63 C 80 78, 50 86, 50 100";
 /** How much of the remaining gap to close each frame. Lower is heavier. */
 const EASE = 0.12;
+/** Samples used to measure the path as drawn. More is smoother, not truer. */
+const SAMPLES = 220;
+
+/**
+ * The path's length in screen pixels rather than in viewBox units.
+ *
+ * Needed because the stroke does not scale: with `vector-effect:
+ * non-scaling-stroke`, the dash pattern is measured in screen pixels while
+ * `getTotalLength` answers in the viewBox's own units. Feeding one to the
+ * other made the dash repeat, and the line arrived as three broken fragments
+ * instead of one stroke.
+ *
+ * The viewBox is squashed to the screen's shape, so the two differ by a
+ * different factor along x than along y and no single number converts them.
+ * Walking the path and adding up the real distances is the honest way.
+ */
+function screenLength(path: SVGPathElement): number {
+  const ctm = path.getScreenCTM();
+  const userLength = path.getTotalLength();
+  if (!ctm || userLength === 0) return userLength;
+
+  let total = 0;
+  let prev = path.getPointAtLength(0).matrixTransform(ctm);
+  for (let i = 1; i <= SAMPLES; i += 1) {
+    const point = path.getPointAtLength((userLength * i) / SAMPLES).matrixTransform(ctm);
+    total += Math.hypot(point.x - prev.x, point.y - prev.y);
+    prev = point;
+  }
+  return total;
+}
 
 export function ScrollThread({ visible }: { visible: boolean }) {
   const lineRef = useRef<SVGPathElement>(null);
-  const arrowRef = useRef<HTMLSpanElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
-  const visibleRef = useRef(visible);
-  visibleRef.current = visible;
+  const [done, setDone] = useState(false);
 
   useEffect(() => {
     const line = lineRef.current;
-    const arrow = arrowRef.current;
-    if (!line || !arrow) return;
+    if (!line) return;
+
+    let length = screenLength(line);
+    line.style.strokeDasharray = `${length}`;
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      line.style.strokeDasharray = "none";
-      arrow.style.opacity = "0";
+      // Drawn in full rather than left as a stub, which is what an untouched
+      // offset on a dashed path would otherwise leave on screen.
+      line.style.strokeDashoffset = "0";
       return;
     }
 
-    // Measured once: getTotalLength forces layout, and this path never changes.
-    const length = line.getTotalLength();
-    line.style.strokeDasharray = `${length}`;
+    // The screen's shape decides the length, so it has to be taken again when
+    // that changes — a rotation, or mobile chrome sliding away.
+    const remeasure = () => {
+      length = screenLength(line);
+      line.style.strokeDasharray = `${length}`;
+    };
+    window.addEventListener("resize", remeasure);
 
     let shown = 0;
     let raf = 0;
@@ -65,26 +99,31 @@ export function ScrollThread({ visible }: { visible: boolean }) {
       if (Math.abs(target - shown) < 0.0004) shown = target;
 
       line.style.strokeDashoffset = `${length * (1 - shown)}`;
-
-      // The arrow rides the curve itself, so it is never beside the line.
-      // Position goes on left/top, which resolve against the viewport, and not
-      // into the transform, where a percentage means a share of the arrow's
-      // own eighteen pixels and moves it nowhere.
-      const point = line.getPointAtLength(length * shown);
-      arrow.style.left = `${point.x}%`;
-      arrow.style.top = `${point.y}%`;
-      arrow.style.opacity = shown > 0.012 && shown < 0.988 ? "1" : "0";
-
       raf = requestAnimationFrame(tick);
     };
 
     raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", remeasure);
+    };
+  }, []);
+
+  // Where the line's journey ends: the section that turns the page to colour.
+  useEffect(() => {
+    const el = document.getElementById("join");
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => setDone(entry.isIntersecting || entry.boundingClientRect.top < 0),
+      { threshold: 0 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
   }, []);
 
   useEffect(() => {
-    if (wrapRef.current) wrapRef.current.style.opacity = visible ? "1" : "0";
-  }, [visible]);
+    if (wrapRef.current) wrapRef.current.style.opacity = visible && !done ? "1" : "0";
+  }, [visible, done]);
 
   return (
     <div
@@ -99,43 +138,19 @@ export function ScrollThread({ visible }: { visible: boolean }) {
         className="h-full w-full"
         aria-hidden="true"
       >
-        {/* The whole route, faint — so the line reads as one being followed
-            rather than one being invented as it goes. */}
-        <path
-          d={PATH}
-          fill="none"
-          stroke="var(--gold)"
-          strokeWidth="1"
-          opacity="0.14"
-          vectorEffect="non-scaling-stroke"
-        />
         <path
           ref={lineRef}
           d={PATH}
           fill="none"
           stroke="var(--bronze)"
           strokeWidth="1.2"
-          opacity="0.5"
+          opacity="0.55"
           strokeLinecap="round"
+          // Without this the stroke itself would be stretched by the same
+          // amount as the path, since the viewBox is squashed to the screen.
           vectorEffect="non-scaling-stroke"
         />
       </svg>
-
-      {/* Positioned in percent of the viewport, matching the 100×100 viewBox
-          the path is drawn in, so the two stay together at any screen size. */}
-      <span ref={arrowRef} className="absolute top-0 left-0" style={{ opacity: 0 }}>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="11" fill="var(--background)" />
-          <circle cx="12" cy="12" r="11" fill="none" stroke="var(--gold)" strokeWidth="1" opacity="0.5" />
-          <path
-            d="M12 6.5 v11 M7.5 13.5 l4.5 4.5 4.5-4.5"
-            stroke="var(--bronze)"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </span>
     </div>
   );
 }
