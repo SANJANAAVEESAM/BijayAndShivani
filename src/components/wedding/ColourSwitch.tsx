@@ -1,40 +1,28 @@
 import { useEffect, useState } from "react";
 
-const KEY = "colour";
-
 /**
- * The switch that brings the invitation into colour.
+ * The switch that carries the invitation's colour.
  *
- * State lives on the document element rather than in React, because the
- * things it changes are spread across the page — photographs, the gold, the
- * bronze — and threading a prop to every one of them would be a worse version
- * of a CSS variable. The stylesheet does the work; this only sets the flag.
+ * It is not how colour normally arrives — the page turns itself colour when
+ * the guest reaches it. This is here to show that something changed, and to
+ * let anyone who prefers the black and white put it back.
  *
- * It is remembered, so a guest who turns colour on and comes back later is not
- * handed black and white a second time. A blocked or full localStorage throws
- * rather than returning null, so every touch of it is guarded: the switch
- * working matters more than the page remembering.
+ * State lives on the document element rather than in React, because the things
+ * it changes are spread across the page — photographs, the gold, the bronze —
+ * and threading a prop to every one of them would be a worse version of a CSS
+ * variable. The stylesheet does the work; this only sets the flag.
+ *
+ * Deliberately not remembered between visits. An earlier version stored the
+ * choice, which was right while the switch was the only way colour arrived and
+ * became wrong the moment the page began revealing itself: a guest returning
+ * with "on" saved would have landed in full colour and never seen the one
+ * thing this section exists to do.
  */
 export function useColour() {
   const [on, setOn] = useState(false);
 
   useEffect(() => {
-    let saved: string | null = null;
-    try {
-      saved = window.localStorage.getItem(KEY);
-    } catch {
-      // Private windows and blocked site data. Start in black and white.
-    }
-    if (saved === "on") setOn(true);
-  }, []);
-
-  useEffect(() => {
     document.documentElement.dataset.colour = on ? "on" : "off";
-    try {
-      window.localStorage.setItem(KEY, on ? "on" : "off");
-    } catch {
-      // Not remembering is survivable; failing to switch is not.
-    }
   }, [on]);
 
   return [on, setOn] as const;

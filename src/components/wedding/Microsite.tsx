@@ -125,6 +125,32 @@ function JoinUs() {
     return () => io.disconnect();
   }, []);
 
+  // Colour arrives on its own when the guest reaches this section — the switch
+  // is there to show what happened and to put it back, not to be hunted for.
+  // A separate observer on a lower threshold so the colour has begun before
+  // the confetti: two things landing on the same frame read as one event.
+  //
+  // Fires once. Watching it continuously would undo a guest who deliberately
+  // turned colour off and then scrolled past here again, which is the one way
+  // an automatic switch can be worse than no switch at all.
+  const revealed = useRef(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting || revealed.current) return;
+        revealed.current = true;
+        io.disconnect();
+        setColour(true);
+      },
+      { threshold: 0.2 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [setColour]);
+
   return (
     <section
       ref={ref}
