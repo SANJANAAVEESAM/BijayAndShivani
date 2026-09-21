@@ -32,7 +32,9 @@ export const WEDDING_PLACE = "";
  * were hardcoded, and a share preview went on naming the wrong couple long
  * after everything on screen had changed.
  */
-export const COUPLE_AND = `${COUPLE.bride} & ${COUPLE.groom}`;
+// Named in the order the couple use themselves, which is not always the order
+// the code happens to store them in.
+export const COUPLE_AND = `${COUPLE.groom} & ${COUPLE.bride}`;
 export const SHARE_DESCRIPTION = [
   `The wedding of ${COUPLE_AND}`,
   WEDDING_DATE_RANGE,

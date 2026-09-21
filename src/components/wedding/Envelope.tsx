@@ -1,20 +1,19 @@
 import { useEffect, useRef, useState } from "react";
-import { COUPLE } from "./data";
+import { COUPLE_AND } from "./data";
 import { startMusic } from "@/lib/music";
-import backdrop from "@/assets/placeholder-portrait.png";
-import monogram from "@/assets/monogram.png";
+import backdrop from "@/assets/backdrop.jpg";
 
 /**
- * Scene 1 — the couple's illustration behind frosted glass, with the monogram
+ * Scene 1 — the couple's photograph behind frosted glass, with their names
  * over it.
  *
  * Deliberately still: tapping hands straight over to the hero, and the overlay
  * in index.tsx cross-fades the two. There is no clearing or focusing sequence
  * in between — the guest should reach the invitation, not watch an animation.
  *
- * The illustration sits at scale 1, exactly where the page's fixed backdrop
+ * The photograph sits at scale 1, exactly where the page's fixed backdrop
  * sits, so it stays registered through the cross-fade and only the frost and
- * monogram dissolve.
+ * the names dissolve.
  */
 export function Envelope({ onOpened }: { onOpened: () => void }) {
   const [opening, setOpening] = useState(false);
@@ -65,44 +64,57 @@ export function Envelope({ onOpened }: { onOpened: () => void }) {
         src={backdrop}
         alt=""
         aria-hidden="true"
-        width={653}
-        height={1000}
+        width={1000}
+        height={1500}
         className="absolute inset-0 h-full w-full object-cover object-center"
       />
 
-      {/* The frost */}
+      {/* The frost, kept thin on purpose.
+          Twenty pixels of blur behind a two-thirds veil did not soften the
+          couple so much as delete them — and since the picture behind it is a
+          picture of them, that left the screen with nothing to be about.
+          Three is judged against their faces, not against the frame: at this
+          distance the faces are only about eighty pixels across, and a blur
+          that flatters a wide illustration erases a photograph. */}
       <div
         aria-hidden="true"
         className="absolute inset-0"
         style={{
-          backdropFilter: "blur(20px) saturate(0.85)",
-          WebkitBackdropFilter: "blur(20px)",
-          background: "color-mix(in oklab, var(--background) 68%, transparent)",
+          backdropFilter: "blur(3px) saturate(0.97)",
+          WebkitBackdropFilter: "blur(3px)",
+          background: "color-mix(in oklab, var(--background) 30%, transparent)",
         }}
       />
 
-      {/* The mark carries its own sprig, swash and names, so the flourishes and
-          the separate name line that used to frame the initials are gone —
-          keeping them would have doubled up on both. */}
-      {/* Truly centred. The old 8% bottom padding lifted the initials clear of
-          the button, but this mark is shorter and leaves ample room without it —
-          and the offset was what made it look misplaced. */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        {/* The couple's own artwork, background keyed out so it sits on the
-            frost rather than as a pasted rectangle. Sized by width — the mark
-            is taller than wide, and height-driven sizing overflows narrow
-            phones sideways. */}
-        <img
-          src={monogram}
-          alt={`${COUPLE.bride} and ${COUPLE.groom}`}
-          width={848}
-          height={942}
-          className="h-auto w-[64%]"
-          // No pool of light behind it and no contrast filter: the artwork is
-          // high enough resolution to hold its own against the frost, and both
-          // were only propping up the low-resolution screenshot it replaced.
-          style={{ filter: "drop-shadow(0 2px 12px oklch(0.28 0.03 55 / 0.2))" }}
-        />
+      {/* A pool of light under the type, and only under the type. Centred, it
+          sat precisely on their faces — this photograph puts them at the
+          middle of the frame, so the names moved up and the light with them. */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(66% 20% at 50% 26%, color-mix(in oklab, var(--background) 66%, transparent), transparent 76%)",
+        }}
+      />
+
+      {/* TODO(content): a monogram, once the couple have one. Until then their
+          names are set rather than a placeholder image shown — a blank card
+          over a photograph reads as something that failed to load. */}
+      <div className="absolute inset-0 flex flex-col items-center px-8 text-center"
+        style={{ paddingTop: "17vh" }}>
+        <p className="font-body text-[0.58rem] font-medium tracking-[0.34em] uppercase text-bronze-deep">
+          Together with their families
+        </p>
+
+        <h1
+          className="mt-6 font-display leading-[1.06] text-ink-strong"
+          style={{ fontSize: "clamp(2.2rem, 11vw, 3.1rem)", fontWeight: 400, letterSpacing: "-0.015em" }}
+        >
+          {COUPLE_AND}
+        </h1>
+
+        <span aria-hidden="true" className="mt-7 h-px w-20" style={{ background: "var(--gradient-gold)" }} />
       </div>
 
       {/* CTA */}

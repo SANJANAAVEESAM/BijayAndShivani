@@ -11,7 +11,7 @@ import type { ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { COUPLE_AND, SHARE_DESCRIPTION, SITE_URL } from "@/components/wedding/data";
-import backdrop from "../assets/placeholder-portrait.png";
+import backdrop from "../assets/backdrop.jpg";
 
 
 function NotFoundComponent() {
@@ -83,13 +83,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       // Absolute, and a purpose-made 1200x630 card rather than the portrait
       // photograph — sharing apps crop 1.91:1, and a portrait loses their faces.
-      { property: "og:image", content: `${SITE_URL}/share.png` },
+      { property: "og:image", content: `${SITE_URL}/share.jpg` },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
       { property: "og:image:alt", content: COUPLE_AND },
       { property: "og:url", content: SITE_URL },
       { property: "og:site_name", content: COUPLE_AND },
-      { name: "twitter:image", content: `${SITE_URL}/share.png` },
+      { name: "twitter:image", content: `${SITE_URL}/share.jpg` },
       { name: "twitter:card", content: "summary_large_image" },
       // Unlisted rather than private — see public/robots.txt.
       { name: "robots", content: "noindex, nofollow" },
@@ -147,8 +147,8 @@ function RootComponent() {
           <img
             src={backdrop}
             alt=""
-            width={653}
-            height={1000}
+            width={1000}
+            height={1500}
             className="h-full w-full object-cover object-center"
             style={{ opacity: 0.34 }}
           />

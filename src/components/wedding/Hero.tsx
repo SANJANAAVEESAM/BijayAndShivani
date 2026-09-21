@@ -1,4 +1,4 @@
-import couplePhoto from "@/assets/placeholder-portrait.png";
+import couplePhoto from "@/assets/couple.jpg";
 import { COUPLE } from "./data";
 import { useScrollProgress } from "@/hooks/use-scroll-progress";
 
