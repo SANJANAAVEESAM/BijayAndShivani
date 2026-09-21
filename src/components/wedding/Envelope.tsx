@@ -1,19 +1,26 @@
 import { useEffect, useRef, useState } from "react";
 import { COUPLE_AND } from "./data";
 import { startMusic } from "@/lib/music";
-import backdrop from "@/assets/backdrop.jpg";
+
+/** How long between one letter starting and the next, in ms. */
+const STAGGER = 78;
+/** The letter animation's own length, in ms — keep in step with styles.css. */
+const LETTER = 1150;
+/** A beat after the name lands before the cue appears, in ms. */
+const BEAT = 420;
 
 /**
- * Scene 1 — the couple's photograph behind frosted glass, with their names
- * over it.
+ * Scene 1 — a plain field of light blue, and the couple's name arriving a
+ * letter at a time.
  *
- * Deliberately still: tapping hands straight over to the hero, and the overlay
- * in index.tsx cross-fades the two. There is no clearing or focusing sequence
- * in between — the guest should reach the invitation, not watch an animation.
+ * Nothing else is on this screen on purpose. It replaced a photograph behind
+ * frosted glass, which asked a guest to look at something before they had been
+ * told whose wedding it was; a name that writes itself says that first, and
+ * says it more quietly.
  *
- * The photograph sits at scale 1, exactly where the page's fixed backdrop
- * sits, so it stays registered through the cross-fade and only the frost and
- * the names dissolve.
+ * Tapping hands over to the hero, and the overlay in index.tsx cross-fades the
+ * two. The tap matters beyond the animation: browsers will not start audio
+ * without a user gesture, and this is the first one on offer.
  */
 export function Envelope({ onOpened }: { onOpened: () => void }) {
   const [opening, setOpening] = useState(false);
@@ -21,11 +28,15 @@ export function Envelope({ onOpened }: { onOpened: () => void }) {
 
   useEffect(() => () => window.clearTimeout(timer.current), []);
 
+  const letters = [...COUPLE_AND];
+  const written = letters.length * STAGGER + LETTER;
+
   const open = () => {
     if (opening) return;
     setOpening(true);
     startMusic();
-    timer.current = window.setTimeout(onOpened, 80);
+    // Long enough for the field to lift before the hero takes over.
+    timer.current = window.setTimeout(onOpened, 480);
   };
 
   return (
@@ -33,14 +44,10 @@ export function Envelope({ onOpened }: { onOpened: () => void }) {
       role="button"
       tabIndex={0}
       aria-label="Open the invitation"
-      // Opens on pointer-down rather than waiting for a click. Safari holds a
-      // tap on a plain element while it decides whether a double-tap is coming,
-      // which read as the first tap doing nothing. Pointer-down is still a user
-      // gesture, so it satisfies the autoplay policy the music depends on.
+      // Pointer-down rather than click: Safari holds a tap on a plain element
+      // while it decides whether a double-tap is coming, which reads as the
+      // first tap doing nothing. It still counts as the gesture audio needs.
       onPointerDown={open}
-      // Kept for anything that dispatches a click without a pointer event —
-      // keyboard activation, assistive tech. The guard in open() means a real
-      // tap firing both still only opens once.
       onClick={open}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -50,88 +57,79 @@ export function Envelope({ onOpened }: { onOpened: () => void }) {
       }}
       className="relative h-full w-full overflow-hidden outline-none"
       style={{
+        // A sky rather than a flat swatch: one blue at three strengths, so the
+        // field has somewhere to be light and somewhere to rest.
+        background:
+          "linear-gradient(175deg, oklch(0.96 0.019 232) 0%, oklch(0.925 0.032 235) 58%, oklch(0.895 0.04 238) 100%)",
         cursor: opening ? "default" : "pointer",
-        // Tells Safari there is no double-tap gesture here, so it stops waiting.
         touchAction: "manipulation",
         WebkitTapHighlightColor: "transparent",
+        opacity: opening ? 0 : 1,
+        transition: "opacity 460ms ease",
       }}
     >
-      {/* Opaque base: the frost above is only partly opaque, so without this the
-          page shows through before the illustration has decoded. */}
-      <div aria-hidden="true" className="absolute inset-0" style={{ background: "var(--background)" }} />
-
-      <img
-        src={backdrop}
-        alt=""
-        aria-hidden="true"
-        width={1000}
-        height={1500}
-        className="absolute inset-0 h-full w-full object-cover"
-        style={{ objectPosition: "34% center" }}
-      />
-
-      {/* The frost, kept thin on purpose.
-          Twenty pixels of blur behind a two-thirds veil did not soften the
-          couple so much as delete them — and since the picture behind it is a
-          picture of them, that left the screen with nothing to be about.
-          Three is judged against their faces, not against the frame: at this
-          distance the faces are only about eighty pixels across, and a blur
-          that flatters a wide illustration erases a photograph. */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0"
-        style={{
-          backdropFilter: "blur(3px) saturate(0.97)",
-          WebkitBackdropFilter: "blur(3px)",
-          background: "color-mix(in oklab, var(--background) 30%, transparent)",
-        }}
-      />
-
-      {/* A pool of light under the type, and only under the type. Centred, it
-          sat precisely on their faces — this photograph puts them at the
-          middle of the frame, so the names moved up and the light with them. */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(66% 20% at 50% 26%, color-mix(in oklab, var(--background) 66%, transparent), transparent 76%)",
-        }}
-      />
-
-      {/* TODO(content): a monogram, once the couple have one. Until then their
-          names are set rather than a placeholder image shown — a blank card
-          over a photograph reads as something that failed to load. */}
-      <div className="absolute inset-0 flex flex-col items-center px-8 text-center"
-        style={{ paddingTop: "17vh" }}>
-        <p className="font-body text-[0.58rem] font-medium tracking-[0.34em] uppercase text-bronze-deep">
-          Together with their families
-        </p>
-
+      <div className="absolute inset-0 flex flex-col items-center justify-center px-7 text-center">
         <h1
-          className="mt-6 font-display leading-[1.06] text-ink-strong"
-          style={{ fontSize: "clamp(2.2rem, 11vw, 3.1rem)", fontWeight: 400, letterSpacing: "-0.015em" }}
+          // The whole name is the accessible name; the spans below are scenery,
+          // and a screen reader spelling them out one at a time would be
+          // nonsense.
+          aria-label={COUPLE_AND}
+          className="font-display leading-[1.08]"
+          style={{
+            fontSize: "clamp(2.3rem, 12.5vw, 3.6rem)",
+            fontWeight: 400,
+            letterSpacing: "-0.012em",
+            color: "oklch(0.32 0.045 250)",
+          }}
         >
-          {COUPLE_AND}
+          {letters.map((ch, i) => (
+            <span
+              key={`${ch}-${i}`}
+              aria-hidden="true"
+              className="animate-letter inline-block"
+              style={{
+                animationDelay: `${i * STAGGER}ms`,
+                // A space has no glyph to blur, but it still has to hold its
+                // width, or the name reflows as each letter lands.
+                whiteSpace: "pre",
+              }}
+            >
+              {ch}
+            </span>
+          ))}
         </h1>
 
-        <span aria-hidden="true" className="mt-7 h-px w-20" style={{ background: "var(--gradient-gold)" }} />
+        <span
+          aria-hidden="true"
+          className="animate-settle mt-8 h-px w-16"
+          style={{
+            background:
+              "linear-gradient(90deg, transparent, oklch(0.55 0.06 250 / 0.55), transparent)",
+            animationDelay: `${written}ms`,
+          }}
+        />
       </div>
 
-      {/* CTA */}
       <div
-        className="absolute inset-x-0 flex justify-center"
+        className="animate-settle absolute inset-x-0 flex justify-center"
         style={{
-          bottom: "calc(env(safe-area-inset-bottom) + 7vh)",
-          transition: "opacity 250ms ease",
-          opacity: opening ? 0 : 1,
+          bottom: "calc(env(safe-area-inset-bottom) + 8vh)",
+          animationDelay: `${written + BEAT}ms`,
           pointerEvents: opening ? "none" : "auto",
         }}
       >
-        <span className="glass animate-cta-pulse rounded-full px-9 py-4 ring-1 ring-white/70">
+        <span
+          className="rounded-full px-9 py-4"
+          style={{
+            background: "oklch(1 0 0 / 0.5)",
+            border: "1px solid oklch(1 0 0 / 0.7)",
+            backdropFilter: "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
+          }}
+        >
           <span
-            className="font-body text-[0.68rem] font-medium tracking-[0.3em] uppercase"
-            style={{ color: "oklch(0.34 0.03 60)" }}
+            className="font-body text-[0.66rem] font-medium tracking-[0.3em] uppercase"
+            style={{ color: "oklch(0.38 0.05 250)" }}
           >
             Open Invitation
           </span>

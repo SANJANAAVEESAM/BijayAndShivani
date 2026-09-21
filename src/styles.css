@@ -352,12 +352,57 @@
   animation: hero-zoom 30s ease-in-out both;
 }
 
+/* The opening: each letter drifts up out of focus into place.
+   Blur as well as fade — a letter that only fades reads as a slideshow, one
+   that resolves reads as ink settling. */
+@keyframes letter-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.42em);
+    filter: blur(9px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@utility animate-letter {
+  animation: letter-in 1.15s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* The cue, once the name has finished arriving. */
+@keyframes settle-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility animate-settle {
+  animation: settle-in 1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-hero-zoom,
   .animate-scroll-nudge,
   .animate-cta-pulse,
   .foil-silver {
     animation: none;
+  }
+
+  /* The name arrives at once rather than letter by letter, but it must still
+     arrive — `animation: none` on a `both`-filled keyframe would leave it
+     stuck at the invisible first frame. */
+  .animate-letter,
+  .animate-settle {
+    animation-duration: 1ms;
+    animation-delay: 0ms !important;
   }
 }
 
