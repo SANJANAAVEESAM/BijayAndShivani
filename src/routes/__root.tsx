@@ -149,8 +149,8 @@ function RootComponent() {
             alt=""
             width={1000}
             height={1500}
-            className="h-full w-full object-cover object-center"
-            style={{ opacity: 0.34 }}
+            className="h-full w-full object-cover"
+            style={{ opacity: 0.34, objectPosition: "34% center" }}
           />
           {/* Warm wash so type stays readable over the busiest parts */}
           <div

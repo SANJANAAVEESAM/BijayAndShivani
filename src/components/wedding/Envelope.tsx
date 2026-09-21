@@ -66,7 +66,8 @@ export function Envelope({ onOpened }: { onOpened: () => void }) {
         aria-hidden="true"
         width={1000}
         height={1500}
-        className="absolute inset-0 h-full w-full object-cover object-center"
+        className="absolute inset-0 h-full w-full object-cover"
+        style={{ objectPosition: "34% center" }}
       />
 
       {/* The frost, kept thin on purpose.
