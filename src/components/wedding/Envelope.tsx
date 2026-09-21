@@ -89,17 +89,21 @@ export function Envelope({ onOpened }: { onOpened: () => void }) {
 
       {/* The frame's two ends, lifted to meet its middle.
           Measured down the screen, the photograph runs bright through the
-          upper middle and falls away at both ends — 222 at the brightest
-          against 181 at the top and 140 at the foot — which reads as shaded
-          top and bottom rather than as one even screen. This is more veil at
+          upper middle and falls away at both ends, which reads as shaded top
+          and bottom rather than as one even screen. This is more veil at
           exactly those two ends and none at all through the centre, so the
-          couple are untouched and only the sky and the wet sand come up. */}
+          couple are untouched and only the sky and the wet sand come up.
+
+          The very first and last rows resolve all the way to the page's own
+          colour. That is what the phone paints behind the status bar and the
+          home indicator, so the screen now runs into its own edges instead of
+          stopping against two bands of a different colour. */}
       <div
         aria-hidden="true"
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(to bottom, color-mix(in oklab, var(--background) 34%, transparent) 0%, transparent 22%, transparent 62%, color-mix(in oklab, var(--background) 52%, transparent) 100%)",
+            "linear-gradient(to bottom, var(--background) 0%, color-mix(in oklab, var(--background) 72%, transparent) 4%, color-mix(in oklab, var(--background) 30%, transparent) 14%, transparent 26%, transparent 60%, color-mix(in oklab, var(--background) 34%, transparent) 84%, color-mix(in oklab, var(--background) 78%, transparent) 96%, var(--background) 100%)",
         }}
       />
 

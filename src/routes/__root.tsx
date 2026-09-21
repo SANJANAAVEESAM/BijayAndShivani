@@ -76,6 +76,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      // What the phone paints outside the page: behind the status bar at the
+      // top and the home indicator at the bottom. Left unset, iOS uses the
+      // body's cream, which framed a cool photograph in two warm bands and
+      // read as "the top and bottom are different" on every design we tried —
+      // including, invisibly, in every screenshot, since headless Chrome draws
+      // no browser chrome at all.
+      { name: "theme-color", content: "#f8f3eb" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "default" },
       { title: COUPLE_AND },
       { name: "description", content: SHARE_DESCRIPTION },
       { property: "og:title", content: COUPLE_AND },
