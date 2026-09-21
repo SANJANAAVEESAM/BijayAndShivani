@@ -352,24 +352,39 @@
   animation: hero-zoom 30s ease-in-out both;
 }
 
-/* The opening: each letter drifts up out of focus into place.
-   Blur as well as fade — a letter that only fades reads as a slideshow, one
-   that resolves reads as ink settling. */
-@keyframes letter-in {
+/* The opening: the name revealed by a soft edge travelling across it, so it
+   reads as one continuous stroke rather than as letters appearing in turn.
+
+   The mask is twice the width of the name and mostly opaque, with a feathered
+   tail. Sliding it from right to left walks that feather across the type. A
+   gradient mask is safe where an image mask would not be: it carries real
+   alpha, so there is no chance of masking nothing at all. */
+@keyframes write-in {
   from {
-    opacity: 0;
-    transform: translateY(0.42em);
-    filter: blur(9px);
+    -webkit-mask-position: 100% 0;
+    mask-position: 100% 0;
   }
   to {
-    opacity: 1;
-    transform: translateY(0);
-    filter: blur(0);
+    -webkit-mask-position: 0% 0;
+    mask-position: 0% 0;
   }
 }
 
-@utility animate-letter {
-  animation: letter-in 1.15s cubic-bezier(0.22, 1, 0.36, 1) both;
+@utility animate-write {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    #000 0%,
+    #000 50%,
+    transparent 62%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(to right, #000 0%, #000 50%, transparent 62%, transparent 100%);
+  -webkit-mask-size: 200% 100%;
+  mask-size: 200% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  /* Eased so the stroke slows as it finishes, the way a hand does. */
+  animation: write-in 2.4s cubic-bezier(0.32, 0.12, 0.2, 1) both;
 }
 
 /* The cue, once the name has finished arriving. */
@@ -399,7 +414,7 @@
   /* The name arrives at once rather than letter by letter, but it must still
      arrive — `animation: none` on a `both`-filled keyframe would leave it
      stuck at the invisible first frame. */
-  .animate-letter,
+  .animate-write,
   .animate-settle {
     animation-duration: 1ms;
     animation-delay: 0ms !important;

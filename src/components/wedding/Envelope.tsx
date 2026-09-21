@@ -2,15 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { COUPLE_AND } from "./data";
 import { startMusic } from "@/lib/music";
 
-/** How long between one letter starting and the next, in ms. */
-const STAGGER = 78;
-/** The letter animation's own length, in ms — keep in step with styles.css. */
-const LETTER = 1150;
+/** How long the stroke takes to cross the name, in ms — in step with styles.css. */
+const WRITE = 2400;
 /** A beat after the name lands before the cue appears, in ms. */
 const BEAT = 420;
 
 /**
- * Scene 1 — a painted sky, and the couple's name written into it in white.
+ * Scene 1 — a painted sky, and the couple's name written across it in white.
  *
  * The sky is a four-second loop: clouds drifting, a flock crossing, pampas
  * grass swaying in at the edges. It carries the screen on its own, so nothing
@@ -31,8 +29,6 @@ export function Envelope({ onOpened }: { onOpened: () => void }) {
 
   useEffect(() => () => window.clearTimeout(timer.current), []);
 
-  const letters = [...COUPLE_AND];
-  const written = letters.length * STAGGER + LETTER;
 
   const open = () => {
     if (opening) return;
@@ -97,38 +93,19 @@ export function Envelope({ onOpened }: { onOpened: () => void }) {
 
       <div className="absolute inset-0 flex flex-col items-center justify-center px-7 text-center">
         <h1
-          // The whole name is the accessible name; the spans below are scenery,
-          // and a screen reader spelling them out one at a time would be
-          // nonsense.
-          aria-label={COUPLE_AND}
-          className="font-display leading-[1.08]"
+          className="animate-write font-display leading-[1.08]"
           style={{
             fontSize: "clamp(2.3rem, 12.5vw, 3.6rem)",
             fontWeight: 400,
             letterSpacing: "-0.012em",
             color: "oklch(1 0 0)",
-            // A shadow rather than a heavier scrim: it travels with the
-            // letters, so a bright cloud drifting behind one of them cannot
-            // swallow it.
+            // The shadow is masked along with the glyphs, so it arrives with
+            // them rather than sitting on the sky ahead of the stroke.
             textShadow:
               "0 2px 22px oklch(0.32 0.05 248 / 0.55), 0 1px 4px oklch(0.32 0.05 248 / 0.45)",
           }}
         >
-          {letters.map((ch, i) => (
-            <span
-              key={`${ch}-${i}`}
-              aria-hidden="true"
-              className="animate-letter inline-block"
-              style={{
-                animationDelay: `${i * STAGGER}ms`,
-                // A space has no glyph to blur, but it still has to hold its
-                // width, or the name reflows as each letter lands.
-                whiteSpace: "pre",
-              }}
-            >
-              {ch}
-            </span>
-          ))}
+          {COUPLE_AND}
         </h1>
 
         <span
@@ -136,7 +113,7 @@ export function Envelope({ onOpened }: { onOpened: () => void }) {
           className="animate-settle mt-8 h-px w-16"
           style={{
             background: "linear-gradient(90deg, transparent, oklch(1 0 0 / 0.75), transparent)",
-            animationDelay: `${written}ms`,
+            animationDelay: `${WRITE}ms`,
           }}
         />
       </div>
@@ -145,7 +122,7 @@ export function Envelope({ onOpened }: { onOpened: () => void }) {
         className="animate-settle absolute inset-x-0 flex justify-center"
         style={{
           bottom: "calc(env(safe-area-inset-bottom) + 8vh)",
-          animationDelay: `${written + BEAT}ms`,
+          animationDelay: `${WRITE + BEAT}ms`,
           pointerEvents: opening ? "none" : "auto",
         }}
       >
