@@ -30,7 +30,6 @@ import { ColourSwitch, useColour } from "./ColourSwitch";
 import { Countdown } from "./Countdown";
 import { DressCodeArt } from "./DressCodeArt";
 import { FloatingNav } from "./FloatingNav";
-import { Hero } from "./Hero";
 import { Modal } from "./Modal";
 import { MusicToggle } from "./MusicToggle";
 import { Ornament } from "./Ornament";
@@ -1258,8 +1257,6 @@ export function Microsite({ live }: { live: boolean }) {
       <MusicToggle />
 
       <main className="relative mx-auto w-full max-w-[26rem]">
-        <Hero live={live} />
-
         <JoinUs />
         <EventsSection />
         <DetailCards />
