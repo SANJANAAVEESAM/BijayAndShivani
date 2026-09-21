@@ -11,7 +11,6 @@ import type { ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { COUPLE_AND, SHARE_DESCRIPTION, SITE_URL } from "@/components/wedding/data";
-import backdrop from "../assets/backdrop.jpg";
 
 
 function NotFoundComponent() {
@@ -148,27 +147,9 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <div className="relative min-h-screen">
-        {/* Fixed backdrop behind every section. Negative z-index keeps it under
-            the content but still above the body's cream, which is what the
-            veil blends into. */}
-        <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-          <img
-            src={backdrop}
-            alt=""
-            width={1000}
-            height={1500}
-            className="tone h-full w-full object-cover"
-            style={{ opacity: 0.34, objectPosition: "34% center" }}
-          />
-          {/* Warm wash so type stays readable over the busiest parts */}
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(180deg, color-mix(in oklab, var(--background) 62%, transparent) 0%, color-mix(in oklab, var(--background) 34%, transparent) 42%, color-mix(in oklab, var(--background) 66%, transparent) 100%)",
-            }}
-          />
-        </div>
+        {/* The fixed photograph that used to sit behind every section is gone:
+            the invitation is blank paper once it is open, and the couple are
+            seen on the opening screen rather than through everything after it. */}
 
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />

@@ -1,4 +1,3 @@
-import couplePhoto from "@/assets/couple.jpg";
 import { COUPLE_AND } from "./data";
 import { useScrollProgress } from "@/hooks/use-scroll-progress";
 
@@ -26,29 +25,11 @@ export function Hero({ live }: { live: boolean }) {
           style={{
             height: `${(100 - progress * COLLAPSE).toFixed(2)}%`,
             boxShadow: "var(--shadow-paper)",
+            // The photograph used to be the card. Without it the card needs a
+            // ground of its own, or it reads as a hole cut in the page.
+            background: "var(--ivory)",
           }}
         >
-          <img
-            src={couplePhoto}
-            alt={`${COUPLE_AND} on the beach`}
-            width={1000}
-            height={1500}
-            // They stand left of middle in the original, so a symmetric crop
-            // leaves the pair off-centre in a tall card.
-            className="tone animate-hero-zoom absolute inset-0 h-full w-full object-cover"
-            style={{ objectPosition: "34% center" }}
-          />
-
-          {/* Just enough shading under the type to keep white legible on sand */}
-          <div
-            aria-hidden="true"
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(180deg, transparent 44%, oklch(0.28 0.03 60 / 0.18) 66%, oklch(0.22 0.03 60 / 0.5) 100%)",
-            }}
-          />
-
           <div
             className="absolute inset-x-0 bottom-0 px-[7%]"
             style={{
@@ -58,12 +39,11 @@ export function Hero({ live }: { live: boolean }) {
             }}
           >
             <h1
-              className="text-center font-display leading-[1.08] text-white italic"
+              className="text-center font-display leading-[1.08] italic text-ink-strong"
               style={{
                 fontSize: "clamp(2.5rem, 12vw, 3.5rem)",
                 // Explicit: the h1 rule's 600 has no italic cut here and would fake-bold.
                 fontWeight: 400,
-                textShadow: "0 2px 18px oklch(0.24 0.03 60 / 0.4)",
               }}
             >
               {COUPLE_AND}
@@ -74,11 +54,11 @@ export function Hero({ live }: { live: boolean }) {
             <div className="mt-5 flex items-center justify-between">
               <span
                 aria-hidden="true"
-                className="animate-scroll-nudge font-body text-sm text-white/60"
+                className="animate-scroll-nudge font-body text-sm text-muted-foreground"
               >
                 ↓
               </span>
-              <span className="font-body text-[0.62rem] font-light tracking-[0.34em] text-white/65 uppercase">
+              <span className="font-body text-[0.62rem] font-light tracking-[0.34em] uppercase text-muted-foreground">
                 Scroll to Explore
               </span>
             </div>

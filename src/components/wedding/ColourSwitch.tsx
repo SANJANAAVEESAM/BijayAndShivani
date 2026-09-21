@@ -43,41 +43,36 @@ export function useColour() {
 export function ColourSwitch({
   on,
   onChange,
-  visible,
 }: {
   on: boolean;
   onChange: (next: boolean) => void;
-  visible: boolean;
 }) {
   return (
-    <div
-      className="pointer-events-none fixed inset-x-0 z-40 flex justify-center"
-      style={{
-        bottom: "calc(env(safe-area-inset-bottom) + 1.25rem)",
-        opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(14px)",
-        transition: "opacity 420ms ease, transform 420ms cubic-bezier(.22,1,.36,1)",
-      }}
-    >
+    <div className="flex justify-center">
       <button
         type="button"
         role="switch"
         aria-checked={on}
         aria-label="Show the invitation in colour"
         onClick={() => onChange(!on)}
-        className="glass pointer-events-auto flex items-center gap-3 rounded-full py-2.5 pr-3 pl-4 ring-1 ring-white/60"
-        style={{ pointerEvents: visible ? "auto" : "none" }}
+        className="flex items-center gap-3 rounded-full py-2.5 pr-3 pl-4"
+        style={{
+          background: "color-mix(in oklab, var(--ivory) 70%, transparent)",
+          border: "1px solid color-mix(in oklab, var(--gold) 38%, transparent)",
+        }}
       >
         <span className="font-body text-[0.58rem] font-medium tracking-[0.24em] uppercase text-bronze-deep">
           {on ? "In colour" : "See in colour"}
         </span>
 
-        {/* The track and its knob. Sized in rem so it grows with the type. */}
+        {/* The track and its knob, sized in rem so they grow with the type. */}
         <span
           aria-hidden="true"
           className="relative block h-[1.15rem] w-[2.1rem] rounded-full"
           style={{
-            background: on ? "var(--bronze)" : "color-mix(in oklab, var(--foreground) 22%, transparent)",
+            background: on
+              ? "var(--bronze)"
+              : "color-mix(in oklab, var(--foreground) 22%, transparent)",
             transition: "background 420ms ease",
           }}
         >

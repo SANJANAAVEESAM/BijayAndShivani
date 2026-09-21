@@ -26,6 +26,7 @@ import {
 } from "./data";
 import { AddToCalendar } from "./AddToCalendar";
 import { Confetti } from "./Confetti";
+import { ColourSwitch, useColour } from "./ColourSwitch";
 import { Countdown } from "./Countdown";
 import { DressCodeArt } from "./DressCodeArt";
 import { FloatingNav } from "./FloatingNav";
@@ -103,6 +104,7 @@ function BotanicalWatermark() {
  * countdown. Confetti fires once per page load, when the guest reaches this.
  */
 function JoinUs() {
+  const [colour, setColour] = useColour();
   const ref = useRef<HTMLElement>(null);
   const [celebrate, setCelebrate] = useState(false);
 
@@ -133,6 +135,11 @@ function JoinUs() {
       <Reveal>
         {/* One gap value, so the spacing between every element is identical */}
         <div className="flex flex-col items-center gap-9">
+          {/* The switch sits here rather than floating over the page: this is
+              the first moment a guest has seen enough of the invitation for
+              "see it in colour" to be an offer rather than a riddle. */}
+          <ColourSwitch on={colour} onChange={setColour} />
+
           <p
             className="font-accent-soft leading-snug text-foreground"
             style={{

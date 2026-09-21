@@ -1,32 +1,58 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 
 /**
- * A single hairline that travels down the page as you scroll.
+ * A hairline down the centre of the page, with an arrow riding its head.
  *
- * It is drawn, not scrolled: the path is fixed to the viewport and revealed by
- * walking its dash offset, so the line appears to extend ahead of the reader
- * rather than slide past them. Below the line's head sits a small arrow, which
- * is the part that reads as travelling.
+ * Driven straight from the scroll position on every animation frame, and
+ * deliberately without a CSS transition on the moving parts. A transition was
+ * what made the first version stutter: scroll fires faster than a 120ms ease
+ * can finish, so each frame restarted the last one and the arrow arrived in
+ * steps rather than travelling. Read the scroll, write the transform, let the
+ * browser's own frame rate do the smoothing.
  *
- * Fixed rather than absolute so it survives the whole page without being
- * measured against any one section — and because the sections it crosses are
- * pinned and collapsing, which a positioned overlay would have to track.
+ * The DOM is written to directly rather than through state for the same
+ * reason — a re-render per frame would put React between the scroll and the
+ * paint, which is exactly where the jitter came from.
+ *
+ * It sits behind the page rather than over it. At z-30 the line drew across
+ * the nav and straight through the couple's names, which is a stripe over an
+ * invitation rather than a thread through one.
  */
 export function ScrollThread({ visible }: { visible: boolean }) {
-  const [progress, setProgress] = useState(0);
+  const lineRef = useRef<SVGPathElement>(null);
+  const arrowRef = useRef<HTMLSpanElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let frame = 0;
-    const measure = () => {
+    const draw = () => {
       const doc = document.documentElement;
       const scrollable = doc.scrollHeight - window.innerHeight;
-      setProgress(scrollable > 0 ? Math.min(1, Math.max(0, window.scrollY / scrollable)) : 0);
+      const p = scrollable > 0 ? Math.min(1, Math.max(0, window.scrollY / scrollable)) : 0;
+
+      const line = lineRef.current;
+      if (line) {
+        const length = line.getTotalLength();
+        line.style.strokeDasharray = `${length}`;
+        line.style.strokeDashoffset = `${length * (1 - p)}`;
+      }
+      const arrow = arrowRef.current;
+      if (arrow) {
+        // vh rather than a measured pixel height: the visual viewport changes
+        // as mobile browser chrome slides away, and this follows it for free.
+        arrow.style.transform = `translate(-50%, -50%) translateY(${(p * 100).toFixed(3)}vh)`;
+        arrow.style.opacity = p > 0.015 && p < 0.985 ? "1" : "0";
+      }
+      const wrap = wrapRef.current;
+      if (wrap) wrap.style.opacity = visible ? "1" : "0";
     };
+
     const onScroll = () => {
       cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(measure);
+      frame = requestAnimationFrame(draw);
     };
-    measure();
+
+    draw();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
     return () => {
@@ -34,78 +60,44 @@ export function ScrollThread({ visible }: { visible: boolean }) {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
     };
-  }, []);
-
-  // The curve the thread follows, in the viewBox's own units.
-  const PATH = "M 14 0 C 14 160, 86 230, 86 400 C 86 570, 14 640, 14 800";
-  // Generous: an overestimate only slows the head, where an underestimate
-  // would finish the line before the page does.
-  const LENGTH = 980;
-
-  const drawn = LENGTH * progress;
-  // Where the head currently sits, so the arrow can ride it.
-  const headY = 800 * progress;
+  }, [visible]);
 
   return (
     <div
+      ref={wrapRef}
       aria-hidden="true"
-      className="pointer-events-none fixed inset-y-0 left-0 z-30"
+      className="pointer-events-none fixed inset-y-0 left-1/2 z-0"
       style={{
-        width: "6.5rem",
-        opacity: visible ? 1 : 0,
+        width: 2,
+        transform: "translateX(-50%)",
+        opacity: 0,
         transition: "opacity 600ms ease",
       }}
     >
       <svg
-        viewBox="0 0 100 800"
+        viewBox="0 0 2 100"
         preserveAspectRatio="none"
         className="h-full w-full"
-        style={{ overflow: "visible" }}
+        aria-hidden="true"
       >
-        {/* The whole route, very faint — so the line reads as a path being
-            followed rather than one being invented. */}
-        <path
-          d={PATH}
-          fill="none"
-          stroke="var(--gold)"
-          strokeWidth="1"
-          opacity="0.18"
-          vectorEffect="non-scaling-stroke"
-        />
-        <path
-          d={PATH}
-          fill="none"
-          stroke="var(--bronze)"
-          strokeWidth="1.4"
-          vectorEffect="non-scaling-stroke"
-          strokeDasharray={LENGTH}
-          strokeDashoffset={LENGTH - drawn}
-          style={{ transition: "stroke-dashoffset 120ms linear" }}
-        />
+        {/* The route, faint — so the line reads as one being followed rather
+            than one being invented as it goes. */}
+        <path d="M 1 0 L 1 100" fill="none" stroke="var(--gold)" strokeWidth="1"
+              opacity="0.1" vectorEffect="non-scaling-stroke" />
+        <path ref={lineRef} d="M 1 0 L 1 100" fill="none" stroke="var(--bronze)"
+              strokeWidth="1.2" opacity="0.55" vectorEffect="non-scaling-stroke" />
       </svg>
 
-      {/* The arrow, riding the head of the line. Positioned in percent of the
-          same 800-unit box the path is drawn in, so the two stay together at
-          any screen height. */}
       <span
-        className="absolute"
-        style={{
-          left: "0.6rem",
-          top: `${(headY / 800) * 100}%`,
-          transform: "translate(-50%, -50%)",
-          transition: "top 120ms linear",
-          opacity: progress > 0.01 && progress < 0.99 ? 1 : 0,
-        }}
+        ref={arrowRef}
+        className="absolute top-0 left-1/2"
+        style={{ transform: "translate(-50%, -50%)", opacity: 0 }}
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="11" fill="var(--background)" opacity="0.9" />
-          <path
-            d="M12 6 v12 M7 13.5 l5 5 5-5"
-            stroke="var(--bronze)"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="11" fill="var(--background)" />
+          <circle cx="12" cy="12" r="11" fill="none" stroke="var(--gold)" strokeWidth="1" opacity="0.5" />
+          <path d="M12 6.5 v11 M7.5 13.5 l4.5 4.5 4.5-4.5" stroke="var(--bronze)"
+                strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </span>
     </div>

@@ -66,7 +66,10 @@ export function Envelope({ onOpened }: { onOpened: () => void }) {
         aria-hidden="true"
         width={1000}
         height={1500}
-        className="tone absolute inset-0 h-full w-full object-cover"
+        // Deliberately not toned: the opening stays in colour whatever the
+        // switch says. It is the one screen seen before there is any switch to
+        // find, so it has to be the picture at its best.
+        className="absolute inset-0 h-full w-full object-cover"
         style={{ objectPosition: "34% center" }}
       />
 
