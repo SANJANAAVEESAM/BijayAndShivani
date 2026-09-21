@@ -11,8 +11,15 @@ const BEAT = 420;
 /** The wash, and the type that sits on it. */
 const TEAL = "oklch(0.56 0.07 193)";
 const INK = "oklch(0.99 0.004 190)";
-/** How much of the wash, and so how little of the photograph. */
-const WASH = 0.8;
+/**
+ * How much of the wash, and so how little of the photograph.
+ *
+ * Every point of this compresses what is left of the picture's own range, so
+ * it is also the dial that settles how flat the colour reads. Below about
+ * 0.85 the wet sand at the foot of the frame still pulls the bottom of the
+ * screen visibly darker than the middle.
+ */
+const WASH = 0.87;
 
 /**
  * Scene 1 — the couple's photograph under a teal wash, their name written
@@ -81,7 +88,16 @@ export function Envelope({ onOpened }: { onOpened: () => void }) {
         // They stand left of middle in the original, so a symmetric crop would
         // leave the pair off-centre on a tall phone.
         className="absolute inset-0 h-full w-full object-cover"
-        style={{ objectPosition: "34% center" }}
+        style={{
+          objectPosition: "34% center",
+          // The picture's own range is what made the screen look shaded at the
+          // top and bottom: bright sky at one end, wet sand at the other, both
+          // showing through the wash as a gradient across the whole height.
+          // Crushing the contrast pulls both ends towards the middle, so the
+          // teal reads as one flat colour and the couple still come through as
+          // shape. The brightness lifts what the contrast drop darkens.
+          filter: "contrast(0.42) brightness(1.2) saturate(0.85)",
+        }}
       />
 
       {/* One even sheet of colour, and deliberately not a multiply blend.
