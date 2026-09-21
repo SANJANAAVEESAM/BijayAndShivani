@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { COUPLE_AND, SHARE_DESCRIPTION, SITE_URL } from "@/components/wedding/data";
 import { Envelope } from "@/components/wedding/Envelope";
 import { Microsite } from "@/components/wedding/Microsite";
+import { ColourSwitch, useColour } from "@/components/wedding/ColourSwitch";
+import { ScrollThread } from "@/components/wedding/ScrollThread";
 
 const TITLE = COUPLE_AND;
 const DESCRIPTION = SHARE_DESCRIPTION;
@@ -26,6 +28,18 @@ function Index() {
   // dissolves straight into the hero rather than cutting to it.
   const [revealed, setRevealed] = useState(false);
   const [overlayGone, setOverlayGone] = useState(false);
+  const [colour, setColour] = useColour();
+  // The switch and the thread are both part of the journey, not the doorstep:
+  // neither appears until the guest is through the opening and moving.
+  const [moving, setMoving] = useState(false);
+
+  useEffect(() => {
+    if (!revealed) return;
+    const onScroll = () => setMoving(window.scrollY > window.innerHeight * 0.35);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [revealed]);
 
   // No scrolling until the hero is revealed.
   useEffect(() => {
@@ -47,6 +61,8 @@ function Index() {
   return (
     <>
       <Microsite live={revealed} />
+      <ScrollThread visible={revealed && moving} />
+      <ColourSwitch on={colour} onChange={setColour} visible={revealed && moving} />
       {!overlayGone && (
         <div
           className="fixed inset-0 z-50"

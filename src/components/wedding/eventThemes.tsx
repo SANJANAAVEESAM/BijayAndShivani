@@ -354,7 +354,7 @@ export function EventScenery({ theme }: { theme: EventTheme }) {
         <img
           src={image}
           alt=""
-          className="absolute inset-0 h-full w-full object-cover"
+          className="tone absolute inset-0 h-full w-full object-cover"
           style={{ objectPosition: imagePosition ?? "center top" }}
         />
         {scrim && <span className="absolute inset-0" style={{ background: scrim }} />}

@@ -35,7 +35,7 @@ export function Hero({ live }: { live: boolean }) {
             height={1500}
             // They stand left of middle in the original, so a symmetric crop
             // leaves the pair off-centre in a tall card.
-            className="animate-hero-zoom absolute inset-0 h-full w-full object-cover"
+            className="tone animate-hero-zoom absolute inset-0 h-full w-full object-cover"
             style={{ objectPosition: "34% center" }}
           />
 

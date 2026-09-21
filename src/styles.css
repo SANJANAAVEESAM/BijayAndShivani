@@ -352,12 +352,56 @@
   animation: hero-zoom 30s ease-in-out both;
 }
 
+/* ---------------------------------------------------------------- colour
+
+   The invitation opens in black and white and is brought into colour by a
+   switch part-way through.
+
+   Done with a variable on the root rather than a filter on a wrapper, and
+   that is not a detail: a `filter` on an ancestor makes it the containing
+   block for every `fixed` descendant, which would strand the page backdrop
+   and the floating nav. Each photograph reads the variable instead, and the
+   accents are swapped token by token.
+
+   Both states are defined on :root, so nothing depends on the class being
+   present before the page has hydrated. */
+:root {
+  --photo-filter: grayscale(1) contrast(1.04);
+  --accent-sat: 0;
+  --colour-ease: 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root[data-colour="on"] {
+  --photo-filter: none;
+  --accent-sat: 1;
+}
+
+/* Applied to photographs, never to a container. */
+.tone {
+  filter: var(--photo-filter);
+  transition: filter var(--colour-ease);
+}
+
+/* The gold and bronze go grey with the pictures, or the page reads as a
+   black-and-white photograph with coloured jewellery on it. */
+:root:not([data-colour="on"]) {
+  --gold: oklch(0.78 0 0);
+  --bronze: oklch(0.52 0 0);
+  --bronze-deep: oklch(0.38 0 0);
+  --gradient-gold: linear-gradient(90deg, transparent, oklch(0.78 0 0), transparent);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-hero-zoom,
   .animate-scroll-nudge,
   .animate-cta-pulse,
   .foil-silver {
     animation: none;
+  }
+
+  /* The colour change still happens, it just happens at once. */
+  .tone {
+    transition-duration: 1ms;
   }
 }
 
