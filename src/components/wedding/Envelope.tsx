@@ -3,38 +3,17 @@ import { COUPLE_AND } from "./data";
 import { startMusic } from "@/lib/music";
 import backdrop from "@/assets/backdrop.jpg";
 
-/** How long the stroke takes to cross the name, in ms — in step with styles.css. */
-const WRITE = 2400;
-/** A beat after the name lands before the cue appears, in ms. */
-const BEAT = 420;
-
-/** The wash, and the type that sits on it. */
-const TEAL = "oklch(0.56 0.07 193)";
-const INK = "oklch(0.99 0.004 190)";
 /**
- * How much of the wash, and so how little of the photograph.
+ * Scene 1 — the couple's photograph behind frosted glass, with their names
+ * over it.
  *
- * Every point of this compresses what is left of the picture's own range, so
- * it is also the dial that settles how flat the colour reads. Below about
- * 0.85 the wet sand at the foot of the frame still pulls the bottom of the
- * screen visibly darker than the middle.
- */
-const WASH = 0.87;
-
-/**
- * Scene 1 — the couple's photograph under a teal wash, their name written
- * across it.
+ * Deliberately still: tapping hands straight over to the hero, and the overlay
+ * in index.tsx cross-fades the two. There is no clearing or focusing sequence
+ * in between — the guest should reach the invitation, not watch an animation.
  *
- * The wash does two jobs at once. It carries the colour, and it flattens the
- * photograph far enough that white type holds everywhere without a scrim or a
- * shadow — the picture reads as a texture under the colour rather than as a
- * photograph competing with the name. Enough of them shows through to know
- * who this is; not so much that the name has to fight for the screen.
- *
- * Tapping hands over to the hero, where the same photograph is finally seen
- * whole and unwashed. The overlay in index.tsx cross-fades the two, and the
- * tap matters beyond the animation: browsers will not start audio without a
- * user gesture, and this is the first one on offer.
+ * The photograph sits at scale 1, exactly where the page's fixed backdrop
+ * sits, so it stays registered through the cross-fade and only the frost and
+ * the names dissolve.
  */
 export function Envelope({ onOpened }: { onOpened: () => void }) {
   const [opening, setOpening] = useState(false);
@@ -42,13 +21,11 @@ export function Envelope({ onOpened }: { onOpened: () => void }) {
 
   useEffect(() => () => window.clearTimeout(timer.current), []);
 
-
   const open = () => {
     if (opening) return;
     setOpening(true);
     startMusic();
-    // Long enough for the sky to lift before the hero takes over.
-    timer.current = window.setTimeout(onOpened, 480);
+    timer.current = window.setTimeout(onOpened, 80);
   };
 
   return (
@@ -56,10 +33,14 @@ export function Envelope({ onOpened }: { onOpened: () => void }) {
       role="button"
       tabIndex={0}
       aria-label="Open the invitation"
-      // Pointer-down rather than click: Safari holds a tap on a plain element
-      // while it decides whether a double-tap is coming, which reads as the
-      // first tap doing nothing. It still counts as the gesture audio needs.
+      // Opens on pointer-down rather than waiting for a click. Safari holds a
+      // tap on a plain element while it decides whether a double-tap is coming,
+      // which read as the first tap doing nothing. Pointer-down is still a user
+      // gesture, so it satisfies the autoplay policy the music depends on.
       onPointerDown={open}
+      // Kept for anything that dispatches a click without a pointer event —
+      // keyboard activation, assistive tech. The guard in open() means a real
+      // tap firing both still only opens once.
       onClick={open}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -69,91 +50,88 @@ export function Envelope({ onOpened }: { onOpened: () => void }) {
       }}
       className="relative h-full w-full overflow-hidden outline-none"
       style={{
-        // Under the photograph as well as behind it, so a slow decode shows
-        // the colour rather than a white flash.
-        background: TEAL,
         cursor: opening ? "default" : "pointer",
+        // Tells Safari there is no double-tap gesture here, so it stops waiting.
         touchAction: "manipulation",
         WebkitTapHighlightColor: "transparent",
-        opacity: opening ? 0 : 1,
-        transition: "opacity 460ms ease",
       }}
     >
+      {/* Opaque base: the frost above is only partly opaque, so without this the
+          page shows through before the illustration has decoded. */}
+      <div aria-hidden="true" className="absolute inset-0" style={{ background: "var(--background)" }} />
+
       <img
         src={backdrop}
         alt=""
         aria-hidden="true"
         width={1000}
         height={1500}
-        // They stand left of middle in the original, so a symmetric crop would
-        // leave the pair off-centre on a tall phone.
         className="absolute inset-0 h-full w-full object-cover"
-        style={{
-          objectPosition: "34% center",
-          // The picture's own range is what made the screen look shaded at the
-          // top and bottom: bright sky at one end, wet sand at the other, both
-          // showing through the wash as a gradient across the whole height.
-          // Crushing the contrast pulls both ends towards the middle, so the
-          // teal reads as one flat colour and the couple still come through as
-          // shape. The brightness lifts what the contrast drop darkens.
-          filter: "contrast(0.42) brightness(1.2) saturate(0.85)",
-        }}
+        style={{ objectPosition: "34% center" }}
       />
 
-      {/* One even sheet of colour, and deliberately not a multiply blend.
-          Multiplying keeps the photograph's own light and shade, which sounds
-          better than it looks here: it drove the dark sky at the top and the
-          wet sand at the bottom down into heavy bands while the middle stayed
-          pale, so the screen read as three stripes rather than one colour.
-          Flat opacity gives the same teal everywhere and lets the couple show
-          through it evenly. */}
+      {/* The frost, kept thin on purpose.
+          Twenty pixels of blur behind a two-thirds veil did not soften the
+          couple so much as delete them — and since the picture behind it is a
+          picture of them, that left the screen with nothing to be about.
+          Three is judged against their faces, not against the frame: at this
+          distance the faces are only about eighty pixels across, and a blur
+          that flatters a wide illustration erases a photograph. */}
       <div
         aria-hidden="true"
         className="absolute inset-0"
-        style={{ background: TEAL, opacity: WASH }}
+        style={{
+          backdropFilter: "blur(3px) saturate(0.97)",
+          WebkitBackdropFilter: "blur(3px)",
+          background: "color-mix(in oklab, var(--background) 30%, transparent)",
+        }}
       />
 
-      <div className="absolute inset-0 flex flex-col items-center justify-center px-7 text-center">
+      {/* A pool of light under the type, and only under the type. Centred, it
+          sat precisely on their faces — this photograph puts them at the
+          middle of the frame, so the names moved up and the light with them. */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(66% 20% at 50% 26%, color-mix(in oklab, var(--background) 66%, transparent), transparent 76%)",
+        }}
+      />
+
+      {/* TODO(content): a monogram, once the couple have one. Until then their
+          names are set rather than a placeholder image shown — a blank card
+          over a photograph reads as something that failed to load. */}
+      <div className="absolute inset-0 flex flex-col items-center px-8 text-center"
+        style={{ paddingTop: "17vh" }}>
+        <p className="font-body text-[0.58rem] font-medium tracking-[0.34em] uppercase text-bronze-deep">
+          Together with their families
+        </p>
+
         <h1
-          className="animate-write font-display leading-[1.08]"
-          style={{
-            fontSize: "clamp(2.3rem, 12.5vw, 3.6rem)",
-            fontWeight: 400,
-            letterSpacing: "-0.012em",
-            color: INK,
-          }}
+          className="mt-6 font-display leading-[1.06] text-ink-strong"
+          style={{ fontSize: "clamp(2.2rem, 11vw, 3.1rem)", fontWeight: 400, letterSpacing: "-0.015em" }}
         >
           {COUPLE_AND}
         </h1>
 
-        <span
-          aria-hidden="true"
-          className="animate-settle mt-8 h-px w-16"
-          style={{
-            background: "linear-gradient(90deg, transparent, oklch(1 0 0 / 0.7), transparent)",
-            animationDelay: `${WRITE}ms`,
-          }}
-        />
+        <span aria-hidden="true" className="mt-7 h-px w-20" style={{ background: "var(--gradient-gold)" }} />
       </div>
 
+      {/* CTA */}
       <div
-        className="animate-settle absolute inset-x-0 flex justify-center"
+        className="absolute inset-x-0 flex justify-center"
         style={{
-          bottom: "calc(env(safe-area-inset-bottom) + 8vh)",
-          animationDelay: `${WRITE + BEAT}ms`,
+          bottom: "calc(env(safe-area-inset-bottom) + 7vh)",
+          transition: "opacity 250ms ease",
+          opacity: opening ? 0 : 1,
           pointerEvents: opening ? "none" : "auto",
         }}
       >
-        <span
-          className="rounded-full px-9 py-4"
-          style={{
-            background: "oklch(1 0 0 / 0.1)",
-            border: "1px solid oklch(1 0 0 / 0.5)",
-          }}
-        >
+        <span className="glass animate-cta-pulse rounded-full px-9 py-4 ring-1 ring-white/70">
           <span
-            className="font-body text-[0.66rem] font-medium tracking-[0.3em] uppercase"
-            style={{ color: INK }}
+            className="font-body text-[0.68rem] font-medium tracking-[0.3em] uppercase"
+            style={{ color: "oklch(0.34 0.03 60)" }}
           >
             Open Invitation
           </span>
