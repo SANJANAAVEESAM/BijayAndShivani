@@ -7,17 +7,16 @@ const WRITE = 2400;
 /** A beat after the name lands before the cue appears, in ms. */
 const BEAT = 420;
 
+/** The ground, and the type that sits on it. */
+const TEAL = "oklch(0.43 0.062 195)";
+const INK = "oklch(0.985 0.004 190)";
+
 /**
- * Scene 1 — a painted sky, and the couple's name written across it in white.
+ * Scene 1 — a plain field of teal, and the couple's name written across it.
  *
- * The sky is a four-second loop: clouds drifting, a flock crossing, pampas
- * grass swaying in at the edges. It carries the screen on its own, so nothing
- * else is on it but the name.
- *
- * Muted and playsinline are not decoration. Mobile browsers refuse to autoplay
- * anything else, and a video that will not start would leave this screen black
- * — hence the poster too, which is the film's own first frame and holds the
- * screen while the file loads, or instead of it if playback never begins.
+ * Nothing else is on this screen. A flat ground needs no scrim and no shadow
+ * to hold white type, so the name can be exactly as clean as it is — which is
+ * the whole point of choosing a colour over a picture.
  *
  * Tapping hands over to the hero, and the overlay in index.tsx cross-fades the
  * two. The tap matters beyond the animation: browsers will not start audio
@@ -56,9 +55,7 @@ export function Envelope({ onOpened }: { onOpened: () => void }) {
       }}
       className="relative h-full w-full overflow-hidden outline-none"
       style={{
-        // The sky's own blue, so any letterboxing or slow first paint is the
-        // same colour as the film rather than a black band.
-        background: "oklch(0.86 0.045 235)",
+        background: TEAL,
         cursor: opening ? "default" : "pointer",
         touchAction: "manipulation",
         WebkitTapHighlightColor: "transparent",
@@ -66,31 +63,6 @@ export function Envelope({ onOpened }: { onOpened: () => void }) {
         transition: "opacity 460ms ease",
       }}
     >
-      <video
-        src="/opening.mp4"
-        poster="/opening-poster.jpg"
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="auto"
-        aria-hidden="true"
-        className="absolute inset-0 h-full w-full object-cover object-center"
-      />
-
-      {/* White on a painted sky is white on white wherever a cloud is. This is
-          just enough shade behind the name to keep it legible, weighted to the
-          middle band where the type sits and fading out before it darkens the
-          clouds the film is there to show. */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(74% 26% at 50% 47%, oklch(0.42 0.05 248 / 0.2), transparent 76%)",
-        }}
-      />
-
       <div className="absolute inset-0 flex flex-col items-center justify-center px-7 text-center">
         <h1
           className="animate-write font-display leading-[1.08]"
@@ -98,11 +70,7 @@ export function Envelope({ onOpened }: { onOpened: () => void }) {
             fontSize: "clamp(2.3rem, 12.5vw, 3.6rem)",
             fontWeight: 400,
             letterSpacing: "-0.012em",
-            color: "oklch(1 0 0)",
-            // The shadow is masked along with the glyphs, so it arrives with
-            // them rather than sitting on the sky ahead of the stroke.
-            textShadow:
-              "0 2px 22px oklch(0.32 0.05 248 / 0.55), 0 1px 4px oklch(0.32 0.05 248 / 0.45)",
+            color: INK,
           }}
         >
           {COUPLE_AND}
@@ -112,7 +80,7 @@ export function Envelope({ onOpened }: { onOpened: () => void }) {
           aria-hidden="true"
           className="animate-settle mt-8 h-px w-16"
           style={{
-            background: "linear-gradient(90deg, transparent, oklch(1 0 0 / 0.75), transparent)",
+            background: "linear-gradient(90deg, transparent, oklch(1 0 0 / 0.7), transparent)",
             animationDelay: `${WRITE}ms`,
           }}
         />
@@ -129,15 +97,13 @@ export function Envelope({ onOpened }: { onOpened: () => void }) {
         <span
           className="rounded-full px-9 py-4"
           style={{
-            background: "oklch(1 0 0 / 0.16)",
-            border: "1px solid oklch(1 0 0 / 0.55)",
-            backdropFilter: "blur(8px)",
-            WebkitBackdropFilter: "blur(8px)",
+            background: "oklch(1 0 0 / 0.1)",
+            border: "1px solid oklch(1 0 0 / 0.5)",
           }}
         >
           <span
             className="font-body text-[0.66rem] font-medium tracking-[0.3em] uppercase"
-            style={{ color: "oklch(1 0 0)", textShadow: "0 1px 6px oklch(0.35 0.05 248 / 0.4)" }}
+            style={{ color: INK }}
           >
             Open Invitation
           </span>
