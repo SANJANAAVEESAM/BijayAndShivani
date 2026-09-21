@@ -87,6 +87,22 @@ export function Envelope({ onOpened }: { onOpened: () => void }) {
         }}
       />
 
+      {/* The frame's two ends, lifted to meet its middle.
+          Measured down the screen, the photograph runs bright through the
+          upper middle and falls away at both ends — 222 at the brightest
+          against 181 at the top and 140 at the foot — which reads as shaded
+          top and bottom rather than as one even screen. This is more veil at
+          exactly those two ends and none at all through the centre, so the
+          couple are untouched and only the sky and the wet sand come up. */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(to bottom, color-mix(in oklab, var(--background) 34%, transparent) 0%, transparent 22%, transparent 62%, color-mix(in oklab, var(--background) 52%, transparent) 100%)",
+        }}
+      />
+
       {/* A pool of light under the type, and only under the type. Centred, it
           sat precisely on their faces — this photograph puts them at the
           middle of the frame, so the names moved up and the light with them. */}
