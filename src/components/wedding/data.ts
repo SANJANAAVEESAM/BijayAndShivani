@@ -9,21 +9,22 @@ const pad = (n: number) => String(n).padStart(2, "0");
 /**
  * A wall-clock Eastern time, as an instant.
  *
- * Late October sits before US daylight saving ends — the first Sunday in
- * November — so these dates are EDT, UTC-4, in 2026 and 2027 alike. Month is
- * zero-based, matching Date.
+ * US daylight saving ends on the first Sunday in November — 1 November in
+ * 2026 — and every one of these celebrations falls after it, so they are EST,
+ * UTC-5. This read UTC-4 when the file was seeded, which was right for the
+ * October wedding it came from and would have put every time here an hour
+ * early, including the muhurtham. Month is zero-based, matching Date.
  */
 const ET = (month: number, day: number, hour: number, minute: number) =>
-  new Date(`${WEDDING_YEAR}-${pad(month + 1)}-${pad(day)}T${pad(hour)}:${pad(minute)}:00-04:00`);
+  new Date(`${WEDDING_YEAR}-${pad(month + 1)}-${pad(day)}T${pad(hour)}:${pad(minute)}:00-05:00`);
 
-/** Muhurtham — Oct 31, 7:25 PM Eastern. */
-export const WEDDING_DATE = ET(9, 31, 19, 25);
+/** Muhurtham — 21 November, 11:36 AM Eastern. */
+export const WEDDING_DATE = ET(10, 21, 11, 36);
 
-// TODO(content): the real dates.
-export const WEDDING_DATE_RANGE = `October 29–31, ${WEDDING_YEAR}`;
+export const WEDDING_DATE_RANGE = `November 14–21, ${WEDDING_YEAR}`;
 
-/** Where the celebrations are. TODO(content). */
-export const WEDDING_PLACE = "";
+/** Where the celebrations are. */
+export const WEDDING_PLACE = "Pennsylvania & New Jersey";
 
 /**
  * The couple, as a shareable name, and the one-line summary link previews use.
@@ -75,7 +76,15 @@ export const CONTACTS: {
   tel: string;
   display: string;
   whatsapp?: string;
-}[] = [];
+}[] = [
+  {
+    // TODO(content): confirm whose number this is before the invitations go
+    // out — it was given without a name, and the site prints one beside it.
+    name: COUPLE.groom,
+    tel: "+17164950790",
+    display: "+1 716 495 0790",
+  },
+];
 
 import type { EventTheme } from "./eventThemes";
 
@@ -87,28 +96,9 @@ import type { EventTheme } from "./eventThemes";
  * just view — otherwise the button leads guests to a wall.
  */
 export const GALLERY_FOLDERS: { label: string; url: string }[] = [
-  {
-    label: "Haldi & Mehendi",
-    url: "https://drive.google.com/drive/folders/1Rb5ErOBBV1mQTkxFFEB5_CsrUfCBRxMI?usp=drive_link",
-  },
-  {
-    label: "Pellikuthuru",
-    url: "https://drive.google.com/drive/folders/1smOuRVF_4XYjHh0zeiK7V9qyUKITsvlJ?usp=drive_link",
-  },
-  {
-    label: "Pellikoduku",
-    url: "https://drive.google.com/drive/folders/1XkwXCSAN68BDPdSGGNjUnxXIWKdX1ue4?usp=drive_link",
-  },
-  {
-    label: "Sangeet & Cocktail Night",
-    url: "https://drive.google.com/drive/folders/120l9T4qSeIYm4RiQ7KfWzW3qdNidNsPr?usp=sharing",
-  },
-  {
-    // TODO(photos): supplied without a label — assumed to be the wedding, being
-    // the only celebration left. Confirm before the invitations go out.
-    label: "Wedding Ceremony",
-    url: "https://drive.google.com/drive/folders/1LRC3mlJclf4CjmCsnI8_ddAj9hBAZj36?usp=drive_link",
-  },
+  // TODO(content): one shared Drive folder per celebration. Left empty rather
+  // than carried over — the folders that were here belonged to another couple
+  // and were live, shareable links to their photographs.
 ];
 
 /**
@@ -174,138 +164,102 @@ export type EventDay = {
   events: WeddingEvent[];
 };
 
-/**
- * Venues that host more than one celebration, named once and shared.
- *
- * Written out here rather than repeated inside each event so the address and
- * the map link cannot drift apart between two celebrations at the same place.
- *
- * The map links carry both the address and Google's own place id (`ftid`),
- * which is what makes them land on the venue's page rather than on a search
- * that could resolve somewhere else. The tracking parameters that came with
- * the shared links are dropped — they are tied to the session that produced
- * them and mean nothing to a guest.
- */
-const HEARTLAND: Venue = {
-  name: "Heartland Heritage Acres",
-  address: "2067 Coddle Creek Hwy, Mooresville, NC 28115",
-  mapsUrl:
-    "https://www.google.com/maps?q=Heartland+Heritage+Acres,+2067+Coddle+Creek+Hwy,+Mooresville,+NC+28115&ftid=0x885401007b69d963:0x1dd2ea1d7281c588",
-};
 
-const LUXE: Venue = {
-  name: "Luxe Event Venue",
-  address: "10213 John Adams Rd, Charlotte, NC 28262",
-  mapsUrl:
-    "https://maps.google.com/maps/place//data=!4m2!3m1!1s0x88541d7fe97a02a5:0x54f177497cd295da?entry=s&sa=X&ved=2ahUKEwiV4qiysf6VAxWyj4kEHTiHF2IQ4kB6BAgEEAA&hl=en",
-};
 
 // A home rather than a hall, so the street is the name and the town is the
 // second line — there is no venue name to put above it.
-const BEECHER_COMMONS: Venue = {
-  name: "19016 Beecher Commons Dr",
-  address: "Huntersville, NC 28078",
-  mapsUrl:
-    "https://www.google.com/maps?q=19016+Beecher+Commons+Dr,+Huntersville,+NC+28078&ftid=0x8856a826dac82289:0xb57cb91368b608fb",
-};
 
+/**
+ * The celebrations, in running order.
+ *
+ * TODO(content): the Pennsylvania venues. Everything before the wedding is
+ * somewhere around Allentown and Fogelsville; the exact halls are still to
+ * come, and the venue list says so rather than naming a place that may move.
+ */
 export const EVENT_DAYS: EventDay[] = [
   {
-    date: "29 October",
+    date: "14 November",
+    weekday: "Saturday",
+    events: [
+      {
+        slug: "engagement",
+        name: "Engagement",
+        themeKey: "pellikuthuru",
+        theme: "Vintage",
+        time: "11:30 AM – 1:00 PM",
+        venue: {
+          name: "To be announced",
+          address: "Allentown / Fogelsville, Pennsylvania",
+        },
+        start: ET(10, 14, 11, 30),
+        end: ET(10, 14, 13, 0),
+      },
+    ],
+  },
+  {
+    date: "19 November",
     weekday: "Thursday",
+    events: [
+      {
+        slug: "mehendi-sangeet",
+        name: "Mehendi & Sangeet",
+        themeKey: "mehendi",
+        theme: "Colour & Music",
+        time: "6:00 PM – 10:00 PM",
+        venue: {
+          name: "To be announced",
+          address: "Allentown / Fogelsville, Pennsylvania",
+        },
+        start: ET(10, 19, 18, 0),
+        end: ET(10, 19, 22, 0),
+      },
+    ],
+  },
+  {
+    date: "20 November",
+    weekday: "Friday",
     events: [
       {
         slug: "haldi",
         name: "Haldi",
         themeKey: "carnival",
         theme: "Carnival",
-        time: "11:00 AM onwards",
-        dressCode: {
-          label: "Festive solid colours",
-          note: "Come dressed in festive solid colours — fuchsia, coral, emerald, teal, royal blue, purple, orange. Mirror work and playful accessories are encouraged.",
+        time: "9:00 AM – 12:00 PM",
+        venue: {
+          name: "To be announced",
+          address: "Allentown / Fogelsville, Pennsylvania",
         },
-        photosUrl: GALLERY_FOLDERS[0].url,
-        venue: HEARTLAND,
-        start: ET(9, 29, 11, 0),
-        end: ET(9, 29, 15, 0),
+        start: ET(10, 20, 9, 0),
+        end: ET(10, 20, 12, 0),
       },
       {
-        slug: "mehendi",
-        name: "Mehendi",
-        themeKey: "mehendi",
-        theme: "Carnival",
-        time: "4:00 PM onwards",
+        slug: "home-ceremony",
+        name: "Bride & Groom Home Ceremony",
+        themeKey: "pellikoduku",
+        theme: "Traditional",
+        time: "12:00 PM – 2:00 PM",
+        // Straight after the haldi, in the same place.
         followsPrevious: true,
-        dressCode: {
-          label: "Festive solid colours",
-          note: "Come dressed in festive solid colours — fuchsia, coral, emerald, teal, royal blue, purple, orange. Mirror work and playful accessories are encouraged.",
-        },
-        photosUrl: GALLERY_FOLDERS[0].url,
         sharesVenueWithPrevious: true,
-        venue: HEARTLAND,
-        start: ET(9, 29, 16, 0),
-        end: ET(9, 29, 21, 0),
+        venue: {
+          name: "To be announced",
+          address: "Allentown / Fogelsville, Pennsylvania",
+        },
+        start: ET(10, 20, 12, 0),
+        end: ET(10, 20, 14, 0),
       },
     ],
   },
   {
-    date: "30 October",
-    weekday: "Friday",
-    events: [
-      {
-        slug: "pellikuthuru",
-        name: "Pellikuthuru",
-        themeKey: "pellikuthuru",
-        theme: "Vintage",
-        time: "9:30 AM onwards",
-        photosUrl: GALLERY_FOLDERS[1].url,
-        venue: LUXE,
-        start: ET(9, 30, 9, 30),
-        end: ET(9, 30, 13, 0),
-      },
-      {
-        slug: "sangeet",
-        name: "Sangeet & Cocktail Night",
-        themeKey: "masquerade",
-        theme: "Bling • Masquerade Ball",
-        time: "6:00 PM onwards",
-        dressCode: {
-          label: "Bling & Sequins",
-          lines: [
-            { who: "Men", what: "Party-wear suits — please avoid jeans and tennis shoes." },
-            { who: "Women", what: "Shiny cocktail wear or sequinned dresses." },
-          ],
-        },
-        photosUrl: GALLERY_FOLDERS[3].url,
-        sharesVenueWithPrevious: true,
-        venue: LUXE,
-        start: ET(9, 30, 18, 0),
-        end: ET(9, 31, 0, 0),
-      },
-    ],
-  },
-  {
-    date: "31 October",
+    date: "21 November",
     weekday: "Saturday",
     events: [
       {
-        slug: "pellikoduku",
-        name: "Pellikoduku",
-        themeKey: "pellikoduku",
-        theme: "Vintage",
-        time: "11:15 AM onwards",
-        photosUrl: GALLERY_FOLDERS[2].url,
-        venue: BEECHER_COMMONS,
-        start: ET(9, 31, 11, 15),
-        end: ET(9, 31, 14, 0),
-      },
-      {
         slug: "wedding",
-        name: "Wedding Ceremony",
+        name: "Wedding",
         themeKey: "telugu",
-        theme: "Telugu Elegance",
-        time: "Muhurtham: 7:25 PM",
-        photosUrl: GALLERY_FOLDERS[4].url,
+        theme: "Traditional",
+        time: "Muhurtham: 11:36 AM",
         invitation: {
           lead: "We cordially invite you to the wedding ceremony of",
           parties: [
@@ -320,13 +274,13 @@ export const EVENT_DAYS: EventDay[] = [
           ],
         },
         venue: {
-          name: "Sweet Magnolia Estate",
-          address: "10101 Bailey Rd, Cornelius, NC 28031",
-          mapsUrl:
-            "https://maps.google.com/maps/place//data=!4m2!3m1!1s0x8856a90c1f2caa73:0xcc55dd654a58f67d?entry=s&sa=X&ved=2ahUKEwirvNPhsf6VAxX238kDHdhBNe4Q4kB6BAgVEAA&hl=en",
+          // TODO(content): confirm the temple's full name and address.
+          name: "Bridgewater Temple",
+          address: "Bridgewater, New Jersey",
+          mapsQuery: "Hindu temple, Bridgewater, New Jersey",
         },
-        start: ET(9, 31, 19, 25),
-        end: ET(9, 31, 23, 59),
+        start: ET(10, 21, 11, 36),
+        end: ET(10, 21, 14, 0),
       },
     ],
   },
@@ -408,11 +362,11 @@ export const EVENTS: WeddingEvent[] = EVENT_DAYS.flatMap((day) => day.events);
 
 
 export const FULL_WEDDING_CAL = {
-  title: `${COUPLE.bride} & ${COUPLE.groom} — Wedding Celebrations`,
-  description: `Three days of celebrations for the wedding of ${COUPLE.bride} & ${COUPLE.groom}. Muhurtham on October 31 at 7:25 PM.`,
-  location: "Charlotte, North Carolina",
-  startUtc: ET(9, 29, 11, 0).toISOString(),
-  endUtc: ET(9, 31, 23, 0).toISOString(),
+  title: `${COUPLE_AND} — Wedding Celebrations`,
+  description: `Celebrations for the wedding of ${COUPLE_AND}. Muhurtham on 21 November at 11:36 AM.`,
+  location: WEDDING_PLACE,
+  startUtc: ET(10, 14, 11, 30).toISOString(),
+  endUtc: ET(10, 21, 14, 0).toISOString(),
 };
 
 export type DetailIcon = "bed" | "plane" | "camera" | "pin";

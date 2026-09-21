@@ -8,6 +8,7 @@ import {
   CONTACT_EMAIL,
   CONTACTS,
   COUPLE,
+  COUPLE_AND,
   DESIGNER,
   DESIGNER_URL,
   DETAIL_CARDS,
@@ -1219,6 +1220,10 @@ function Faqs() {
             ))}
           </div>
 
+          {/* No address yet, no rule and no buttons: a "Copy email" that copies
+              an empty string is worse than an absent one. */}
+          {CONTACT_EMAIL && (
+            <>
           <span
             aria-hidden="true"
             className="block h-px w-12"
@@ -1244,6 +1249,8 @@ function Faqs() {
               Open mail app
             </a>
           </div>
+            </>
+          )}
         </div>
       </Modal>
     </>
@@ -1361,7 +1368,7 @@ function Rsvp() {
                     : "Thank you for letting us know — you'll be missed."}
                 </p>
                 <p className="font-body text-xs text-muted-foreground">
-                  Your reply has reached {COUPLE.bride} &amp; {COUPLE.groom}. Nothing more to do.
+                  Your reply has reached {COUPLE_AND}. Nothing more to do.
                 </p>
                 {/* Now genuinely optional: the answer is already recorded. */}
                 <a
@@ -1563,7 +1570,7 @@ export function Microsite({ live }: { live: boolean }) {
               We can't wait to celebrate with you
             </p>
             <p className="mt-8 font-body text-[0.6rem] tracking-[0.3em] uppercase text-muted-foreground">
-              {COUPLE.bride} & {COUPLE.groom}
+              {COUPLE_AND}
             </p>
           </Reveal>
         </section>
